@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Southside Drops — Daniel Vega</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'DM Sans',sans-serif;cursor:none;}
+
+/* CURSOR */
+.cursor{position:fixed;width:12px;height:12px;border-radius:50%;background:#c8102e;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.12s;}
+.cursor.big{transform:translate(-50%,-50%) scale(3);background:rgba(200,16,46,0.3);}
+
+/* ENTRY */
+#entry{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.2s;}
+#entry.out{opacity:0;pointer-events:none;}
+.e-kanji{font-family:'Playfair Display',serif;font-size:clamp(52px,9vw,100px);color:rgba(200,16,46,0.1);letter-spacing:0.14em;margin-bottom:24px;animation:fu 2s ease forwards;opacity:0;}
+.e-title{font-family:'Playfair Display',serif;font-size:clamp(30px,5.5vw,64px);font-weight:900;color:#fff;letter-spacing:-1px;text-align:center;animation:fu 2s ease 0.45s forwards;opacity:0;}
+.e-sub{font-size:clamp(9px,1.3vw,12px);color:#333;letter-spacing:0.22em;text-transform:uppercase;margin-top:8px;animation:fu 2s ease 0.9s forwards;opacity:0;}
+.e-line{width:1px;height:52px;background:linear-gradient(transparent,#c8102e,transparent);margin:28px auto;animation:fu 2s ease 1.3s forwards;opacity:0;}
+.e-btn{background:none;border:0.5px solid #252525;color:#fff;padding:12px 42px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;cursor:none;animation:fu 2s ease 1.7s forwards;opacity:0;transition:border-color 0.2s,color 0.2s;}
+.e-btn:hover{border-color:#c8102e;color:#c8102e;}
+@keyframes fu{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* EXPERIENCE */
+#exp{position:fixed;inset:0;z-index:10;opacity:0;transition:opacity 0.8s;pointer-events:none;}
+#exp.on{opacity:1;pointer-events:all;}
+
+/* SLIDES */
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 1s;pointer-events:none;background:#000;}
+.slide.active{opacity:1;pointer-events:all;}
+
+/* SPLIT LAYOUT - origin slides */
+.split{position:absolute;inset:0;display:grid;grid-template-columns:52% 48%;}
+
+.bat-divider-line{position:absolute;top:10%;left:52%;transform:translateX(-50%);width:1px;height:80%;background:linear-gradient(to bottom,transparent,#c8102e 20%,#c8102e 80%,transparent);opacity:0.4;z-index:10;pointer-events:none;}
+.split-left{display:flex;flex-direction:column;justify-content:center;gap:16px;padding:44px 40px 72px 52px;position:relative;z-index:2;height:100%;}
+.split-right{position:relative;overflow:hidden;}
+.s-eyebrow{font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#c8102e;margin-bottom:20px;}
+.s-headline{font-family:'Playfair Display',serif;font-size:clamp(30px,4vw,52px);font-weight:900;color:#fff;line-height:0.92;letter-spacing:-1.5px;margin-bottom:16px;}
+.s-rule{width:40px;height:2px;background:#c8102e;margin-bottom:24px;}
+.s-body{font-family:'Playfair Display',serif;font-size:clamp(12px,1.2vw,14.5px);font-style:italic;color:#555;line-height:1.65;flex:1;padding-bottom:16px;}
+.s-body em{color:#888;font-style:normal;}
+.s-note{font-size:9px;color:#2a2a2a;letter-spacing:0.12em;text-transform:uppercase;margin-top:28px;font-family:'DM Mono',monospace;}
+
+/* Home plate clip path for right panel */
+.plate-window{
+  position:absolute;inset:0;
+  clip-path:polygon(20% 0%, 80% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%);
+}
+.plate-window-img{
+  position:absolute;inset:-5%;
+  background-size:cover;background-position:center;
+  filter:brightness(0.4) saturate(0.5);
+  transform:scale(1.05);
+  transition:transform 7s ease;
+}
+.slide.active .plate-window-img{transform:scale(1);}
+.plate-window-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to right,#000 0%,rgba(0,0,0,0.2) 40%,transparent 100%);
+}
+.plate-caption{position:absolute;bottom:32px;right:32px;font-size:9px;color:#282828;letter-spacing:0.1em;text-transform:uppercase;font-family:'DM Mono',monospace;}
+
+/* PLATE STAGE */
+#plate-stage{position:absolute;inset:0;opacity:0;transition:opacity 0.8s;pointer-events:none;background:#000;}
+#plate-stage.active{opacity:1;pointer-events:all;}
+#plate-canvas{position:absolute;inset:0;width:100%;height:100%;}
+
+/* Plate UI */
+#plate-ui{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:0 52px 88px;pointer-events:none;z-index:5;}
+.p-face-lbl{font-size:9px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:#c8102e;margin-bottom:6px;font-family:'DM Mono',monospace;}
+.p-name{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,48px);font-weight:900;color:#fff;line-height:0.95;letter-spacing:-0.5px;}
+.p-tag{font-size:clamp(9px,1vw,11px);color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;margin-top:5px;}
+.p-ctr{font-family:'DM Mono',monospace;font-size:10px;color:#2a2a2a;letter-spacing:0.08em;margin-top:7px;}
+.p-ctr em{color:#555;font-style:normal;}
+
+/* Click hint */
+#click-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:8px;transition:opacity 0.6s;}
+#click-hint.hidden{opacity:0;}
+.ch-ring{width:56px;height:56px;border:0.5px solid rgba(200,16,46,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;animation:pulse 2.5s ease-in-out infinite;}
+.ch-icon{font-size:18px;color:rgba(255,255,255,0.2);}
+.ch-txt{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:#2a2a2a;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:0.6;}50%{transform:scale(1.1);opacity:1;}}
+
+/* Concept dots */
+#concept-dots{position:absolute;top:32px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:6;}
+.cdot{width:5px;height:5px;border-radius:50%;background:#141414;border:0.5px solid #222;transition:background 0.3s,border-color 0.3s;}
+.cdot.active{background:#c8102e;border-color:#c8102e;}
+.cdot.done{background:#2a2a2a;border-color:#333;}
+
+/* Next concept btn */
+#next-btn{position:absolute;bottom:88px;right:52px;background:none;border:0.5px solid #282828;color:#fff;padding:11px 26px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;cursor:none;z-index:6;opacity:0;transition:opacity 0.5s,border-color 0.2s,color 0.2s;pointer-events:none;}
+#next-btn.vis{opacity:1;pointer-events:all;}
+#next-btn:hover{border-color:#c8102e;color:#c8102e;}
+
+/* Process slide */
+.s-dark{background:#060606;}
+.proc-in{position:relative;z-index:2;padding:52px;display:flex;flex-direction:column;gap:22px;max-width:820px;width:100%;}
+.p-head{font-family:'Playfair Display',serif;font-size:clamp(24px,3.5vw,42px);font-weight:900;color:#fff;line-height:1.1;}
+.stats-r{display:flex;gap:30px;flex-wrap:wrap;}
+.st-n{font-family:'Playfair Display',serif;font-size:38px;font-weight:900;color:#c8102e;line-height:1;}
+.st-l{font-size:9px;color:#2e2e2e;letter-spacing:0.09em;text-transform:uppercase;margin-top:2px;}
+.stack-g{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.stool{background:#0e0e0e;padding:12px 14px;border-left:2px solid #c8102e;}
+.st-name{font-size:11px;font-weight:600;color:#fff;margin-bottom:2px;}
+.st-use{font-size:9px;color:#3e3e3e;line-height:1.5;}
+
+/* Closer */
+.s-black{background:#000;}
+.cl-in{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:52px;height:100%;gap:16px;}
+.cl-eye{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:#c8102e;}
+.cl-set{font-family:'Playfair Display',serif;font-size:clamp(14px,1.8vw,18px);font-style:italic;color:#444;line-height:1.75;}
+.cl-q{font-family:'Playfair Display',serif;font-size:clamp(42px,7vw,80px);font-weight:900;color:#fff;letter-spacing:-2px;line-height:0.92;white-space:nowrap;}
+.cl-rule{width:64px;height:2px;background:#c8102e;}
+.cl-cta{display:inline-block;background:#c8102e;color:#fff;text-decoration:none;padding:14px 38px;font-size:10px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;border-radius:1px;transition:background 0.15s;cursor:none;}
+.cl-cta:hover{background:#a00018;}
+.cl-by{font-size:11px;color:#2a2a2a;margin-top:5px;}
+.cl-by strong{color:#383838;}
+
+/* CHROME */
+#chrome{position:fixed;inset:0;z-index:50;pointer-events:none;}
+.logo{position:absolute;top:24px;left:52px;font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:rgba(255,255,255,0.14);letter-spacing:0.06em;}
+.act-ind{position:absolute;top:24px;right:52px;font-size:9px;color:#222;letter-spacing:0.14em;text-transform:uppercase;}
+.n-arr{position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(200,16,46,0.7);font-size:40px;cursor:none;transition:color 0.15s;padding:16px;pointer-events:all;line-height:1;}
+.n-arr:hover{color:#c8102e;}
+.n-prev{left:0;}.n-next{right:0;}
+.ctr{position:absolute;bottom:24px;left:52px;font-family:'DM Mono',monospace;font-size:10px;color:#252525;letter-spacing:0.08em;}
+.ctr em{color:#fff;font-style:normal;}
+.pw{position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(255,255,255,0.04);}
+.pb{height:100%;background:#c8102e;width:0%;}
+.ctrls{position:absolute;bottom:18px;right:52px;pointer-events:all;}
+.cb{background:none;border:none;color:#252525;cursor:none;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;transition:color 0.2s;padding:4px;}
+.cb:hover,.cb.on{color:#fff;}
+.hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:9px;color:#181818;letter-spacing:0.14em;text-transform:uppercase;pointer-events:none;transition:opacity 1s;white-space:nowrap;}
+.hint.out{opacity:0;}
+
+@media(max-width:640px){
+  .split{grid-template-columns:1fr;}
+  .split-right{display:none;}
+  .split-left{padding:40px 24px;}
+  #plate-ui{padding:0 24px 72px;}
+  #next-btn{right:24px;bottom:72px;}
+  .logo{left:24px;}.ctr{left:24px;}
+  .act-ind,.ctrls{right:24px;}
+  .n-arr{display:none;}
+  .stack-g{grid-template-columns:1fr 1fr;}
+  .cl-q{white-space:normal;letter-spacing:-1px;}
+  .proc-in{padding:32px 24px;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cur"></div>
+
+<!-- ENTRY -->
+<div id="entry">
+  <div class="e-kanji">村上 &times; 南側</div>
+  <div class="e-title">Southside Drops</div>
+  <div class="e-sub">A brand concept &middot; Built in one day</div>
+  <div class="e-line"></div>
+  <button class="e-btn" onclick="goEnter()">Enter</button>
+</div>
+
+<div id="exp">
+
+  <!-- SLIDE 0: The Bronx — where it started -->
+  <div class="slide" id="s0">
+    <div class="split">
+      <div class="split-left">
+        <div>
+          <div class="s-eyebrow">Act I &middot; The Origin &middot; 01 of 02</div>
+          <div class="s-headline">Where it<br>started.</div>
+          <div class="s-rule"></div>
+        </div>
+        <div class="s-body">
+          Albert Einstein Hospital. The Bronx. Mom in surgery. Sox game on mute. Phone in lap. Nowhere to be.
+          <br><br>
+          The White Sox announcer called Murakami the <em>Southside Samurai</em> &mdash; the team took issue. A friend in Pennsylvania thought we could do better. <em>&ldquo;We should trademark Southside Shogun.&rdquo;</em>
+          <br><br>
+          He was joking. Probably.
+          <br><br>
+          One prompt to ChatGPT. Fifteen minutes. Four concept art pieces. A friend texted back from Pennsylvania: <em>&ldquo;BRO. This is actually REAL.&rdquo;</em>
+          <br><br>
+          That text is when a joke became a thought experiment.
+        </div>
+        <div class="s-note">Albert Einstein Hospital &middot; The Bronx &middot; 11:31 PM</div>
+      </div>
+      <div class="bat-divider-line"></div>
+      <div class="split-right" style="display:flex;align-items:center;justify-content:center;background:#000;">
+        <div style="position:relative;width:min(400px,80%);flex-shrink:0;">
+          <div style="width:100%;padding-bottom:88%;position:relative;overflow:hidden;
+            clip-path:polygon(0% 15%, 100% 15%, 100% 58%, 50% 100%, 0% 58%);
+            box-shadow:0 0 0 1.5px rgba(200,16,46,0.5), 0 0 18px 2px rgba(200,16,46,0.15);">
+            <div id="bg0" style="position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center center;filter:brightness(0.65) saturate(0.55);"></div>
+          </div>
+          <div style="font-size:9px;color:#2a2a2a;letter-spacing:0.1em;text-transform:uppercase;
+            text-align:center;margin-top:14px;font-family:'DM Mono',monospace;">ChatGPT &middot; first session &middot; 15 min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: Where it went -->
+  <div class="slide" id="s1">
+    <div class="split">
+      <div class="split-left">
+        <div>
+          <div class="s-eyebrow">Act I &middot; The Origin &middot; 02 of 02</div>
+          <div class="s-headline">Where it<br>went.</div>
+          <div class="s-rule"></div>
+        </div>
+        <div class="s-body">
+          More products. More concepts. Both colorways. Hat variations, hoodie variations, sleeveless jerseys. ChatGPT kept up &mdash; until it didn&rsquo;t.
+          <br><br>
+          Text on blank slides. No design. No story. That&rsquo;s when Claude entered &mdash; not for the images, but for the thinking.
+          <br><br>
+          Late night. The Bronx. A conversation about what a silk bomber jacket could be &mdash; 80s MLB satin meets Japanese sukajan. <em>That wasn&rsquo;t in the brief.</em> It emerged from the conversation.
+          <br><br>
+          That&rsquo;s how the best ideas always work.
+        </div>
+        <div class="s-note">Same session &middot; ChatGPT &rarr; Claude &middot; 12 hours total</div>
+      </div>
+      <div class="bat-divider-line"></div>
+      <div class="split-right" style="display:flex;align-items:center;justify-content:center;background:#000;">
+        <div style="position:relative;width:min(400px,80%);flex-shrink:0;">
+          <div style="width:100%;padding-bottom:88%;position:relative;overflow:hidden;
+            clip-path:polygon(0% 15%, 100% 15%, 100% 58%, 50% 100%, 0% 58%);
+            box-shadow:0 0 0 1.5px rgba(200,16,46,0.5), 0 0 18px 2px rgba(200,16,46,0.15);">
+            <div id="bg1" style="position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center center;filter:brightness(0.65) saturate(0.55);"></div>
+          </div>
+          <div style="font-size:9px;color:#2a2a2a;letter-spacing:0.1em;text-transform:uppercase;
+            text-align:center;margin-top:14px;font-family:'DM Mono',monospace;">Second iteration &middot; concept sharpened</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLATE STAGE (Act II) -->
+  <div id="plate-stage">
+    <canvas id="plate-canvas"></canvas>
+    <div id="plate-ui">
+      <div class="p-face-lbl" id="faceLbl"></div>
+      <div class="p-name" id="pName"></div>
+      <div class="p-tag" id="pTag"></div>
+      <div class="p-ctr"><em id="fNum">1</em> / <span id="fTot">5</span> &middot; click to spin</div>
+    </div>
+    <div id="click-hint">
+      <div class="ch-ring"><div class="ch-icon">&#8635;</div></div>
+      <div class="ch-txt">Click to spin</div>
+    </div>
+    <div id="concept-dots"></div>
+    <button id="next-btn" onclick="nextConcept()">Next &rarr;</button>
+  </div>
+
+  <!-- Process -->
+  <div class="slide s-dark" id="s-proc">
+    <div style="position:absolute;inset:0;display:grid;grid-template-rows:auto 1fr auto;padding:52px;gap:40px;">
+      <!-- Top: eyebrow + headline -->
+      <div>
+        <div style="font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:#c8102e;margin-bottom:16px;">Act III &middot; Behind the Sprint</div>
+        <div style="font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,62px);font-weight:900;color:#fff;line-height:0.95;letter-spacing:-1px;">A thought partner doesn&rsquo;t tell you the answer.<br>It helps you find it.</div>
+      </div>
+      <!-- Middle: stats + stack side by side -->
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:48px;align-items:center;">
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div style="border-left:2px solid #c8102e;padding-left:16px;">
+            <div style="font-family:'Playfair Display',serif;font-size:clamp(44px,6vw,72px);font-weight:900;color:#c8102e;line-height:1;">12</div>
+            <div style="font-size:10px;color:#333;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;">Hours</div>
+            <div style="font-size:10px;color:#222;letter-spacing:0.08em;text-transform:uppercase;">One session</div>
+          </div>
+          <div style="border-left:2px solid #c8102e;padding-left:16px;">
+            <div style="font-family:'Playfair Display',serif;font-size:clamp(44px,6vw,72px);font-weight:900;color:#c8102e;line-height:1;">5</div>
+            <div style="font-size:10px;color:#333;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;">Concept</div>
+            <div style="font-size:10px;color:#222;letter-spacing:0.08em;text-transform:uppercase;">Lines</div>
+          </div>
+          <div style="border-left:2px solid #c8102e;padding-left:16px;">
+            <div style="font-family:'Playfair Display',serif;font-size:clamp(44px,6vw,72px);font-weight:900;color:#c8102e;line-height:1;">11</div>
+            <div style="font-size:10px;color:#333;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;">AI</div>
+            <div style="font-size:10px;color:#222;letter-spacing:0.08em;text-transform:uppercase;">Renders</div>
+          </div>
+          <div style="border-left:2px solid #c8102e;padding-left:16px;">
+            <div style="font-family:'Playfair Display',serif;font-size:clamp(44px,6vw,72px);font-weight:900;color:#c8102e;line-height:1;">$0</div>
+            <div style="font-size:10px;color:#333;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;">Hard</div>
+            <div style="font-size:10px;color:#222;letter-spacing:0.08em;text-transform:uppercase;">Cost</div>
+          </div>
+        </div>
+        <!-- Stack -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+          <div style="background:#0e0e0e;padding:20px 18px;border-top:2px solid #c8102e;">
+            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">ChatGPT</div>
+            <div style="font-size:11px;color:#444;line-height:1.6;">Ideation &amp; first renders. The spark.</div>
+          </div>
+          <div style="background:#0e0e0e;padding:20px 18px;border-top:2px solid #c8102e;">
+            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">Claude</div>
+            <div style="font-size:11px;color:#444;line-height:1.6;">Strategy. Deck. Code. The thought partner.</div>
+          </div>
+          <div style="background:#0e0e0e;padding:20px 18px;border-top:2px solid #c8102e;">
+            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">Firefly</div>
+            <div style="font-size:11px;color:#444;line-height:1.6;">First photorealistic renders.</div>
+          </div>
+          <div style="background:#0e0e0e;padding:20px 18px;border-top:2px solid #c8102e;">
+            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">Leonardo</div>
+            <div style="font-size:11px;color:#444;line-height:1.6;">Hero renders. Ideogram v3.</div>
+          </div>
+          <div style="background:#0e0e0e;padding:20px 18px;border-top:2px solid #c8102e;">
+            <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">Gemini</div>
+            <div style="font-size:11px;color:#444;line-height:1.6;">Transit tee &amp; bag iteration.</div>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom: footnote -->
+      <div style="border-top:0.5px solid #161616;padding-top:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:clamp(13px,1.6vw,17px);font-style:italic;color:#3a3a3a;line-height:1.7;">I didn&rsquo;t know Firefly or Leonardo existed before this session. Claude recommended them.<br>I just kept asking the right questions until the vision got there.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Closer -->
+  <div class="slide s-black" id="s-close">
+    <div class="cl-in">
+      <div class="cl-eye">Daniel Vega &middot; AI Brand Sprint</div>
+      <p class="cl-set">We all have that idea we&rsquo;ve been<br>thinking about forever.</p>
+      <div class="cl-q">What&rsquo;s yours?</div>
+      <div class="cl-rule"></div>
+      <a href="https://www.linkedin.com/in/drv1/" target="_blank" class="cl-cta">Let me be your thought partner</a>
+      <div class="cl-by"><strong>Daniel Vega</strong> &middot; I build the programs, partnerships, and campaigns that didn&rsquo;t exist before I got there.</div>
+    </div>
+  </div>
+
+</div><!-- /exp -->
+
+<!-- CHROME -->
+<div id="chrome">
+  <div class="logo">SD</div>
+  <div class="act-ind" id="actInd"></div>
+  <button class="n-arr n-prev" id="nPrev" onclick="navSlide(-1)">&#8249;</button>
+  <button class="n-arr n-next" id="nNext" onclick="navSlide(1)">&#8250;</button>
+  <div class="ctr"><em id="ctrC">01</em> / <span id="ctrT">09</span></div>
+  <div class="pw"><div class="pb" id="pbBar"></div></div>
+  <div class="ctrls"><button class="cb" id="autoBtn" onclick="autoToggle()">&#9654; Auto</button></div>
+  <div class="hint" id="hint">Use arrow keys or click arrows to navigate</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const ORIGIN1="./renders/render_01.png";const ORIGIN2="./renders/render_02.png";
+const CONCEPTS=[{"id": "shogun", "name": "Shogun of the Southside", "tagline": "将軍 · The flagship · Always available", "kanji": "将軍", "accent": "#c8c8c8", "faces": [{"label": "Snapback", "imgKey": "shogun_0", "hasRender": true}, {"label": "Graphic Tee", "imgKey": "shogun_1", "hasRender": true}, {"label": "Hoodie", "imgKey": "shogun_2", "hasRender": true}, {"label": "Sleeveless Jersey", "imgKey": "shogun_3", "hasRender": true}, {"label": "将軍", "imgKey": "shogun_4", "hasRender": false}]}, {"id": "shinobi", "name": "Southside Shinobi", "tagline": "忍 · Stealth drop · 48-hour window", "kanji": "忍", "accent": "#c8102e", "faces": [{"label": "Mask-Eye Snapback", "imgKey": "shinobi_0", "hasRender": true}, {"label": "Minimal Tee", "imgKey": "shinobi_1", "hasRender": false}, {"label": "Ghost Hoodie", "imgKey": "shinobi_2", "hasRender": false}, {"label": "Crossbody Bag", "imgKey": "shinobi_3", "hasRender": false}, {"label": "忍", "imgKey": "shinobi_4", "hasRender": false}]}, {"id": "merciless", "name": "Murakami the Merciless", "tagline": "無慈悲 · Hype drop · Villain energy", "kanji": "無慈悲", "accent": "#cc2200", "faces": [{"label": "Kanji Stack Tee", "imgKey": "merciless_0", "hasRender": true}, {"label": "Blood Red Hoodie", "imgKey": "merciless_1", "hasRender": false}, {"label": "Snapback", "imgKey": "merciless_2", "hasRender": false}, {"label": "Mini Bat", "imgKey": "merciless_3", "hasRender": false}, {"label": "無慈悲", "imgKey": "merciless_4", "hasRender": false}]}, {"id": "blossom", "name": "Cherry Blossom Bomber", "tagline": "桜 · Sakura season · 100 pieces", "kanji": "桜", "accent": "#d4889a", "faces": [{"label": "Sukajan Bomber", "imgKey": "blossom_0", "hasRender": true}, {"label": "Women's Kimono", "imgKey": "blossom_1", "hasRender": true}, {"label": "Men's Kimono Jersey", "imgKey": "blossom_2", "hasRender": true}, {"label": "White Snapback", "imgKey": "blossom_3", "hasRender": false}, {"label": "桜", "imgKey": "blossom_4", "hasRender": false}]}, {"id": "nippon", "name": "Nippon to Southside", "tagline": "熊本 → 35TH ST · The journey", "kanji": "旅", "accent": "#b8963c", "faces": [{"label": "Transit Sling Bag", "imgKey": "nippon_0", "hasRender": true}, {"label": "Transit Tee", "imgKey": "nippon_1", "hasRender": true}, {"label": "Snapback", "imgKey": "nippon_2", "hasRender": false}, {"label": "Journey Hoodie", "imgKey": "nippon_3", "hasRender": false}, {"label": "旅", "imgKey": "nippon_4", "hasRender": false}]}];
+const FACE_IMGS={
+"shogun_0":"./renders/render_03.jpg",
+"shogun_1":"./renders/render_04.jpg",
+"shogun_2":"./renders/render_05.jpg",
+"shogun_3":"./renders/render_06.jpg",
+"shogun_4":"./renders/render_07.svg",
+"shinobi_0":"./renders/render_08.jpg",
+"shinobi_1":"./renders/render_09.svg",
+"shinobi_2":"./renders/render_10.svg",
+"shinobi_3":"./renders/render_11.svg",
+"shinobi_4":"./renders/render_12.svg",
+"merciless_0":"./renders/render_13.jpg",
+"merciless_1":"./renders/render_14.svg",
+"merciless_2":"./renders/render_15.svg",
+"merciless_3":"./renders/render_16.svg",
+"merciless_4":"./renders/render_17.svg",
+"blossom_0":"./renders/render_18.jpg",
+"blossom_1":"./renders/render_19.jpg",
+"blossom_2":"./renders/render_20.jpg",
+"blossom_3":"./renders/render_21.svg",
+"blossom_4":"./renders/render_22.svg",
+"nippon_0":"./renders/render_23.png",
+"nippon_1":"./renders/render_24.png",
+"nippon_2":"./renders/render_25.svg",
+"nippon_3":"./renders/render_26.svg",
+"nippon_4":"./renders/render_27.svg",
+};
+
+// Set bg images
+const bg0=document.getElementById('bg0');
+const bg1=document.getElementById('bg1');
+if(bg0){bg0.style.backgroundImage='url("'+ORIGIN1+'")';bg0.style.backgroundSize='cover';bg0.style.backgroundPosition='center top';}
+if(bg1){bg1.style.backgroundImage='url("'+ORIGIN2+'")';bg1.style.backgroundSize='cover';bg1.style.backgroundPosition='center top';}
+
+// Sections: 4 origin + 5 plate + process + closer = 11
+const SECS=['s0','s1','plate_0','plate_1','plate_2','plate_3','plate_4','s-proc','s-close'];
+const NTOT=SECS.length;
+let curSec=0;
+
+// Cursor
+const cur=document.getElementById('cur');
+document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+document.addEventListener('mouseover',e=>{cur.classList.toggle('big',!!e.target.closest('button,a,canvas'));});
+
+// Entry
+function goEnter(){
+  document.getElementById('entry').classList.add('out');
+  setTimeout(()=>{
+    document.getElementById('exp').classList.add('on');
+    showSec(0);
+    setTimeout(()=>document.getElementById('hint').classList.add('out'),5000);
+  },900);
+}
+
+function showSec(n){
+  if(n<0)n=0;if(n>=NTOT)n=NTOT-1;
+  curSec=n;
+  const id=SECS[n];
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+  const ps=document.getElementById('plate-stage');
+  if(ps)ps.classList.remove('active');
+  if(id.startsWith('plate_')){
+    if(ps)ps.classList.add('active');
+    try{loadConcept(parseInt(id.split('_')[1]));}catch(e){console.warn(e);}
+    setNavVis(false);
+  } else {
+    const el=document.getElementById(id);
+    if(el)el.classList.add('active');
+    setNavVis(true);
+  }
+  updateChrome();
+  if(playing)resetAuto();
+}
+
+function setNavVis(v){
+  ['nPrev','nNext'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.opacity=v?'':'0';
+    el.style.pointerEvents=v?'':'none';
+  });
+}
+
+function navSlide(d){
+  if(SECS[curSec].startsWith('plate_'))return;
+  showSec(curSec+d);
+}
+
+// ── THREE.JS — Pentagon Prism Carousel ──
+let scene,camera,renderer;
+let prismGroup; // group that rotates
+let spinning=false,curFace=0,curCI=0;
+let facesSeen=new Set();
+let texCache={};
+let floatT=0;
+const FACES=5;
+const FACE_ANGLE=Math.PI*2/FACES;
+
+function initThree(){
+  const canvas=document.getElementById('plate-canvas');
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.1;
+
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x000000);
+  scene.fog=new THREE.Fog(0x000000,12,25);
+
+  camera=new THREE.PerspectiveCamera(40,window.innerWidth/window.innerHeight,0.1,100);
+  camera.position.set(0,0,4.8);
+  camera.lookAt(0,-0.1,0);
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xffffff,0.05));
+  const key=new THREE.SpotLight(0xffffff,2.5);
+  key.position.set(3,4,4);key.angle=Math.PI/5;key.penumbra=0.5;
+  key.castShadow=true;
+  scene.add(key);
+  const fill=new THREE.SpotLight(0x4411aa,0.3);
+  fill.position.set(-4,2,2);
+  scene.add(fill);
+  const rim=new THREE.DirectionalLight(0xc8102e,0.5);
+  rim.position.set(0,-1,-3);
+  scene.add(rim);
+
+  buildPrism();
+  animLoop();
+
+  window.addEventListener('resize',()=>{
+    camera.aspect=window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth,window.innerHeight);
+  });
+
+  canvas.addEventListener('click',spinNext);
+  canvas.addEventListener('touchend',e=>{e.preventDefault();spinNext();},{passive:false});
+}
+
+function buildPrism(){
+  if(prismGroup){scene.remove(prismGroup);}
+  prismGroup=new THREE.Group();
+
+  // Flat extruded pentagon — home plate shape, spins on Y axis
+  // 5 faces: front face shows current render, rotates to reveal next
+  const shape=makePentagon();
+  const geo=new THREE.ExtrudeGeometry(shape,{
+    depth:0.18,bevelEnabled:false
+  });
+  geo.computeBoundingBox();
+  const c=new THREE.Vector3();
+  geo.boundingBox.getCenter(c);
+
+  const frontTex=getTex(curCI,curFace);
+  const accent=new THREE.Color(CONCEPTS[curCI].accent);
+  const sideCol=accent.clone().multiplyScalar(0.1);
+
+  const mats=[
+    new THREE.MeshStandardMaterial({map:frontTex,roughness:0.28,metalness:0.15}),
+    new THREE.MeshStandardMaterial({color:sideCol,roughness:0.65,metalness:0.35})
+  ];
+  const mesh=new THREE.Mesh(geo,mats);
+  mesh.castShadow=true;mesh.receiveShadow=true;
+  mesh.position.sub(c);
+  prismGroup.add(mesh);
+
+  // No accent ring — removed to prevent ghost outline
+
+  scene.add(prismGroup);
+}
+
+function makePentagon(){
+  // Home plate: flat top, angled shoulders, point at bottom
+  // Like standing at the plate looking toward pitcher
+  const s=new THREE.Shape();
+  const w=1.5, h=1.4;
+  s.moveTo(-w,  h*0.25);  // top-left
+  s.lineTo( w,  h*0.25);  // top-right
+  s.lineTo( w, -h*0.15);  // right shoulder drop
+  s.lineTo( 0, -h);       // bottom point
+  s.lineTo(-w, -h*0.15);  // left shoulder drop
+  s.closePath();
+  return s;
+}
+
+function getTex(ci,fi){
+  const key=CONCEPTS[ci].faces[fi].imgKey;
+  if(texCache[key])return texCache[key];
+  const t=new THREE.TextureLoader().load(FACE_IMGS[key]);
+  t.encoding=THREE.sRGBEncoding;
+  texCache[key]=t;
+  return t;
+}
+
+const BASE_SPEED = 0.006; // slow ambient rotation
+let rotSpeed = BASE_SPEED;
+
+function animLoop(){
+  requestAnimationFrame(animLoop);
+  floatT+=0.006;
+  if(prismGroup&&!spinning){
+    prismGroup.rotation.y += rotSpeed;
+    prismGroup.position.y = Math.sin(floatT)*0.08;
+    // Decelerate back to base speed after a click boost
+    if(rotSpeed > BASE_SPEED){
+      rotSpeed = Math.max(BASE_SPEED, rotSpeed * 0.96);
+    }
+  }
+  if(renderer&&scene&&camera)renderer.render(scene,camera);
+}
+
+function spinNext(){
+  if(spinning)return;
+  spinning=true;
+  document.getElementById('click-hint').classList.add('hidden');
+
+  const nf=(curFace+1)%FACES;
+  const mesh=prismGroup.children[0];
+  const startY=prismGroup.rotation.y;
+  const targetY=startY + (Math.PI*2/FACES); // exactly one face forward
+  const dur=700;
+  const t0=performance.now();
+  let swapped=false;
+
+  // Pause ambient rotation during tween
+  const savedSpeed=rotSpeed;
+  rotSpeed=0;
+
+  function frame(now){
+    const t=Math.min((now-t0)/dur,1);
+    const ease=t<0.5?2*t*t:-1+(4-2*t)*t;
+    prismGroup.rotation.y=startY+(targetY-startY)*ease;
+    // Swap texture at midpoint
+    if(!swapped && t>=0.5){
+      const nt=getTex(curCI,nf);
+      if(mesh && Array.isArray(mesh.material)){
+        mesh.material[0].map=nt;
+        mesh.material[0].needsUpdate=true;
+      }
+      swapped=true;
+    }
+    if(t<1){
+      requestAnimationFrame(frame);
+    } else {
+      prismGroup.rotation.y=targetY;
+      curFace=nf;
+      facesSeen.add(nf);
+      spinning=false;
+      rotSpeed=savedSpeed; // resume ambient rotation
+      updatePlateUI();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function loadConcept(ci){
+  curCI=ci;curFace=0;
+  facesSeen=new Set([0]);
+  // Preload all textures for this concept before building
+  let loaded=0;
+  const total=CONCEPTS[ci].faces.length;
+  function onLoad(){
+    loaded++;
+    if(loaded===1){ // Build as soon as first (current face) loads
+      buildPrism();
+      updatePlateUI();
+    }
+  }
+  CONCEPTS[ci].faces.forEach((_,i)=>{
+    const key=CONCEPTS[ci].faces[i].imgKey;
+    if(texCache[key]){ onLoad(); return; }
+    const t=new THREE.TextureLoader().load(FACE_IMGS[key], onLoad);
+    t.encoding=THREE.sRGBEncoding;
+    texCache[key]=t;
+  });
+  updateDots(ci);
+  document.getElementById('next-btn').classList.remove('vis');
+  document.getElementById('click-hint').classList.remove('hidden');
+}
+
+function updatePlateUI(){
+  const c=CONCEPTS[curCI],f=c.faces[curFace];
+  document.getElementById('pName').textContent=c.name;
+  document.getElementById('pTag').textContent=c.tagline;
+  document.getElementById('faceLbl').textContent=f.label;
+  document.getElementById('fNum').textContent=curFace+1;
+  document.getElementById('fTot').textContent=c.faces.length;
+  if(facesSeen.size>=FACES){
+    const nb=document.getElementById('next-btn');
+    nb.textContent=curCI===CONCEPTS.length-1?'See the process →':'Next Concept →';
+    nb.classList.add('vis');
+  }
+}
+
+function updateDots(active){
+  const el=document.getElementById('concept-dots');
+  el.innerHTML='';
+  CONCEPTS.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='cdot'+(i===active?' active':i<active?' done':'');
+    el.appendChild(d);
+  });
+}
+
+function nextConcept(){
+  const isLast=curCI===CONCEPTS.length-1;
+  if(isLast)showSec(SECS.indexOf('s-proc'));
+  else showSec(SECS.indexOf('plate_'+(curCI+1)));
+}
+
+// Chrome
+function updateChrome(){
+  document.getElementById('ctrC').textContent=String(curSec+1).padStart(2,'0');
+  document.getElementById('ctrT').textContent=String(NTOT).padStart(2,'0');
+  const labels={s0:'The Origin',s1:'The Pivot','plate_0':'Shogun','plate_1':'Shinobi','plate_2':'Merciless','plate_3':'Cherry Blossom','plate_4':'Nippon','s-proc':'Process','s-close':'Closer'};
+  document.getElementById('actInd').textContent=labels[SECS[curSec]]||'';
+}
+
+// Auto
+let playing=false,rafAuto=null,t0Auto=null;
+const AUTO_MS=7000;
+function autoToggle(){
+  playing=!playing;
+  const b=document.getElementById('autoBtn');
+  if(playing){b.textContent='⏸ Pause';b.classList.add('on');startAuto();}
+  else{b.textContent='▶ Auto';b.classList.remove('on');stopAuto();}
+}
+function startAuto(){
+  stopAuto();t0Auto=performance.now();
+  function tick(now){
+    const p=Math.min((now-t0Auto)/AUTO_MS,1);
+    document.getElementById('pbBar').style.width=(p*100)+'%';
+    if(p>=1){
+      const s=SECS[curSec];
+      if(s.startsWith('plate_')){
+        if(facesSeen.size>=FACES) nextConcept();
+        else spinNext();
+      } else navSlide(1);
+      t0Auto=performance.now();
+    }
+    if(playing)rafAuto=requestAnimationFrame(tick);
+  }
+  rafAuto=requestAnimationFrame(tick);
+}
+function stopAuto(){if(rafAuto)cancelAnimationFrame(rafAuto);document.getElementById('pbBar').style.width='0%';}
+function resetAuto(){t0Auto=performance.now();document.getElementById('pbBar').style.width='0%';}
+
+// Keys + swipe
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();
+    if(SECS[curSec].startsWith('plate_'))spinNext();else navSlide(1);}
+  else if(e.key==='ArrowLeft'){e.preventDefault();
+    if(!SECS[curSec].startsWith('plate_'))navSlide(-1);}
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{
+  if(SECS[curSec].startsWith('plate_'))return;
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>48)navSlide(dx<0?1:-1);
+});
+
+// Init
+try{
+  if(typeof THREE!=='undefined')initThree();
+  else console.warn('Three.js not loaded');
+}catch(e){console.warn('Three.js init failed:',e);}
+updateChrome();
+showSec(0);
+</script>
+</body>
+</html>

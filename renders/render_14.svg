@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 380" width="20" height="380">
+  <!-- Knob at top (this is vertical, barrel at top) -->
+  <ellipse cx="10" cy="12" rx="8" ry="5" fill="#2a1a0a"/>
+  <!-- Handle -->
+  <rect x="7.5" y="12" width="5" height="80" fill="#1a0e04"/>
+  <!-- Diagonal cord wraps on handle — subtle, not glowing -->
+  <line x1="6" y1="22" x2="14" y2="30" stroke="#8a3020" stroke-width="1.2" opacity="0.7"/>
+  <line x1="6" y1="34" x2="14" y2="42" stroke="#8a3020" stroke-width="1.2" opacity="0.7"/>
+  <line x1="6" y1="46" x2="14" y2="54" stroke="#8a3020" stroke-width="1.2" opacity="0.7"/>
+  <line x1="6" y1="58" x2="14" y2="66" stroke="#8a3020" stroke-width="1.2" opacity="0.7"/>
+  <line x1="6" y1="70" x2="14" y2="78" stroke="#8a3020" stroke-width="1.2" opacity="0.7"/>
+  <!-- Tsuba guard ring -->
+  <rect x="4" y="90" width="12" height="6" rx="2" fill="#888" opacity="0.5"/>
+  <!-- Taper from handle to barrel -->
+  <path d="M7.5,96 Q6,140 4,180 L16,180 Q14,140 12.5,96 Z" fill="#3d2010"/>
+  <!-- Barrel — wide, wood grain suggestion -->
+  <rect x="3" y="180" width="14" height="185" rx="7" fill="#3d2010"/>
+  <!-- Subtle wood grain lines on barrel -->
+  <line x1="6" y1="200" x2="6" y2="350" stroke="#2a1508" stroke-width="0.8" opacity="0.4"/>
+  <line x1="10" y1="195" x2="10" y2="355" stroke="#4a2812" stroke-width="0.8" opacity="0.3"/>
+  <line x1="14" y1="200" x2="14" y2="350" stroke="#2a1508" stroke-width="0.8" opacity="0.4"/>
+  <!-- Barrel end cap -->
+  <ellipse cx="10" cy="365" rx="7" ry="4" fill="#2a1508"/>
+</svg>
